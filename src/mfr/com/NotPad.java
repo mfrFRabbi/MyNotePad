@@ -16,7 +16,8 @@ public class NotPad extends JFrame {
     JMenuBar menuBar;
     JMenu mnuFile, mnuEdit, mnuFormat, mnuHelp;
     JMenuItem itmNew, itmOpen, itmSave, itmSaveAs, itmExit,
-    itmCut,itmCopy,itmPaste;
+    itmCut,itmCopy,itmPaste,fontColor;
+    JCheckBoxMenuItem wordWrap;
     UndoAction undoAction;
     RedoAction redoAction;
     UndoManager undoManager;
@@ -56,6 +57,19 @@ public class NotPad extends JFrame {
             undoAction.update();
             redoAction.update();
         });
+        wordWrap.addActionListener(e -> {
+            if(wordWrap.isSelected()){
+                textArea.setLineWrap(true);
+                textArea.setWrapStyleWord(true);
+            }  else{
+                textArea.setLineWrap(false);
+                textArea.setWrapStyleWord(false);
+            }
+        });
+        fontColor.addActionListener(e -> {
+            Color color = JColorChooser.showDialog(this,"Choose font color",Color.black);
+            textArea.setForeground(color);
+        });
 
     }
 
@@ -85,6 +99,8 @@ public class NotPad extends JFrame {
         itmCut = new JMenuItem("Cut");
         itmCopy = new JMenuItem("Copy");
         itmPaste = new JMenuItem("Paste");
+        wordWrap = new JCheckBoxMenuItem("Word Wrap");
+        fontColor = new JMenuItem("Font Color");
         //adding shortcut
         itmNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
         itmOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
@@ -107,6 +123,9 @@ public class NotPad extends JFrame {
         mnuEdit.add(itmCut);
         mnuEdit.add(itmCopy);
         mnuEdit.add(itmPaste);
+        //add menu item to format
+        mnuFormat.add(wordWrap);
+        mnuFormat.add(fontColor);
         //add menu item to menu bar
         menuBar.add(mnuFile);
         menuBar.add(mnuEdit);
