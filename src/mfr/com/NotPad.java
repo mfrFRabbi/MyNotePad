@@ -1,6 +1,9 @@
 package mfr.com;
 
 import javax.swing.*;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -14,6 +17,9 @@ public class NotPad extends JFrame {
     JMenu mnuFile, mnuEdit, mnuFormat, mnuHelp;
     JMenuItem itmNew, itmOpen, itmSave, itmSaveAs, itmExit,
     itmCut,itmCopy,itmPaste;
+    UndoAction undoAction;
+    RedoAction redoAction;
+    UndoManager undoManager;
     String fileName;
     String fileContent;
     JFileChooser fileChooser;
@@ -44,10 +50,19 @@ public class NotPad extends JFrame {
         itmPaste.addActionListener(e -> {
             textArea.paste();
         });
+        //undo redo action
+        textArea.getDocument().addUndoableEditListener(e -> {
+            undoManager.addEdit(e.getEdit());
+            undoAction.update();
+            redoAction.update();
+        });
 
     }
 
     private void intFrame() {
+        undoManager = new UndoManager();
+        undoAction = new UndoAction();
+        redoAction = new RedoAction();
         fileChooser = new JFileChooser(".");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setTitle("untitled-Notepad");
@@ -87,6 +102,8 @@ public class NotPad extends JFrame {
         mnuFile.addSeparator();
         mnuFile.add(itmExit);
         //add menu item to edit
+        mnuEdit.add(undoAction);
+        mnuEdit.add(redoAction);
         mnuEdit.add(itmCut);
         mnuEdit.add(itmCopy);
         mnuEdit.add(itmPaste);
@@ -230,5 +247,60 @@ public class NotPad extends JFrame {
         fileContent = null;
         this.setTitle("untitled-Notepad");
     }
+
+    //undo redo working now
+    class UndoAction extends AbstractAction{
+        UndoAction(){
+            super("undo");
+            setEnabled(false);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                undoManager.undo();
+            }catch (CannotUndoException undoException){
+                undoException.printStackTrace();
+            }
+            update();
+            redoAction.update();
+        }
+        protected void update(){
+            if(undoManager.canUndo()){
+                setEnabled(true);
+                putValue(Action.NAME,"undo");
+            }else {
+                setEnabled(false);
+            }
+        }
+    }
+
+    class RedoAction extends AbstractAction{
+        RedoAction(){
+            super("redo");
+            setEnabled(false);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                undoManager.redo();
+            }catch (CannotRedoException redoException){
+                redoException.printStackTrace();
+            }
+            update();
+            undoAction.update();
+
+        }
+        protected void update(){
+            if(undoManager.canRedo()){
+                setEnabled(true);
+                putValue(Action.NAME,"redo");
+            }else {
+                setEnabled(false);
+            }
+        }
+    }
+
 
 }
