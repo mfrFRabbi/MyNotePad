@@ -12,11 +12,11 @@ import java.util.Scanner;
 import java.util.StringTokenizer;
 
 public class NotPad extends JFrame {
-    JTextArea textArea;
+    static JTextArea textArea;
     JMenuBar menuBar;
     JMenu mnuFile, mnuEdit, mnuFormat, mnuHelp;
     JMenuItem itmNew, itmOpen, itmSave, itmSaveAs, itmExit,
-    itmCut,itmCopy,itmPaste,fontColor;
+            itmCut, itmCopy, itmPaste, itmFontColor, itmFind, itmReplace;
     JCheckBoxMenuItem wordWrap;
     UndoAction undoAction;
     RedoAction redoAction;
@@ -24,6 +24,7 @@ public class NotPad extends JFrame {
     String fileName;
     String fileContent;
     JFileChooser fileChooser;
+   // public static NotPad notPad = new NotPad();
 
     public NotPad() {
         intFrame();
@@ -58,17 +59,23 @@ public class NotPad extends JFrame {
             redoAction.update();
         });
         wordWrap.addActionListener(e -> {
-            if(wordWrap.isSelected()){
+            if (wordWrap.isSelected()) {
                 textArea.setLineWrap(true);
                 textArea.setWrapStyleWord(true);
-            }  else{
+            } else {
                 textArea.setLineWrap(false);
                 textArea.setWrapStyleWord(false);
             }
         });
-        fontColor.addActionListener(e -> {
-            Color color = JColorChooser.showDialog(this,"Choose font color",Color.black);
+        itmFontColor.addActionListener(e -> {
+            Color color = JColorChooser.showDialog(this, "Choose font color", Color.black);
             textArea.setForeground(color);
+        });
+        itmFind.addActionListener(e -> {
+                new FindAndReplace(this,false);
+        });
+        itmReplace.addActionListener(e -> {
+            new FindAndReplace(this,true);
         });
 
     }
@@ -100,16 +107,18 @@ public class NotPad extends JFrame {
         itmCopy = new JMenuItem("Copy");
         itmPaste = new JMenuItem("Paste");
         wordWrap = new JCheckBoxMenuItem("Word Wrap");
-        fontColor = new JMenuItem("Font Color");
+        itmFontColor = new JMenuItem("Font Color");
+        itmFind = new JMenuItem("Find");
+        itmReplace = new JMenuItem("Replace");
         //adding shortcut
         itmNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
         itmOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
         itmSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
         // itmSaveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-       // itmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK));
-        itmCut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,ActionEvent.CTRL_MASK));
-        itmCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,ActionEvent.CTRL_MASK));
-        itmPaste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,ActionEvent.CTRL_MASK));
+        // itmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK));
+        itmCut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK));
+        itmCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
+        itmPaste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK));
         //add menu item to file
         mnuFile.add(itmNew);
         mnuFile.add(itmOpen);
@@ -123,9 +132,12 @@ public class NotPad extends JFrame {
         mnuEdit.add(itmCut);
         mnuEdit.add(itmCopy);
         mnuEdit.add(itmPaste);
+        mnuEdit.addSeparator();
+        mnuEdit.add(itmFind);
+        mnuEdit.add(itmReplace);
         //add menu item to format
         mnuFormat.add(wordWrap);
-        mnuFormat.add(fontColor);
+        mnuFormat.add(itmFontColor);
         //add menu item to menu bar
         menuBar.add(mnuFile);
         menuBar.add(mnuEdit);
@@ -268,8 +280,8 @@ public class NotPad extends JFrame {
     }
 
     //undo redo working now
-    class UndoAction extends AbstractAction{
-        UndoAction(){
+    class UndoAction extends AbstractAction {
+        UndoAction() {
             super("undo");
             setEnabled(false);
         }
@@ -278,24 +290,25 @@ public class NotPad extends JFrame {
         public void actionPerformed(ActionEvent e) {
             try {
                 undoManager.undo();
-            }catch (CannotUndoException undoException){
+            } catch (CannotUndoException undoException) {
                 undoException.printStackTrace();
             }
             update();
             redoAction.update();
         }
-        protected void update(){
-            if(undoManager.canUndo()){
+
+        protected void update() {
+            if (undoManager.canUndo()) {
                 setEnabled(true);
-                putValue(Action.NAME,"undo");
-            }else {
+                putValue(Action.NAME, "undo");
+            } else {
                 setEnabled(false);
             }
         }
     }
 
-    class RedoAction extends AbstractAction{
-        RedoAction(){
+    class RedoAction extends AbstractAction {
+        RedoAction() {
             super("redo");
             setEnabled(false);
         }
@@ -304,21 +317,25 @@ public class NotPad extends JFrame {
         public void actionPerformed(ActionEvent e) {
             try {
                 undoManager.redo();
-            }catch (CannotRedoException redoException){
+            } catch (CannotRedoException redoException) {
                 redoException.printStackTrace();
             }
             update();
             undoAction.update();
 
         }
-        protected void update(){
-            if(undoManager.canRedo()){
+
+        protected void update() {
+            if (undoManager.canRedo()) {
                 setEnabled(true);
-                putValue(Action.NAME,"redo");
-            }else {
+                putValue(Action.NAME, "redo");
+            } else {
                 setEnabled(false);
             }
         }
+    }
+    public static JTextArea getTextArea(){
+        return textArea;
     }
 
 
