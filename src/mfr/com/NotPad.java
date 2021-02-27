@@ -16,7 +16,8 @@ public class NotPad extends JFrame {
     JMenuBar menuBar;
     JMenu mnuFile, mnuEdit, mnuFormat, mnuHelp;
     JMenuItem itmNew, itmOpen, itmSave, itmSaveAs, itmExit,
-            itmCut, itmCopy, itmPaste, itmFontColor, itmFind, itmReplace;
+            itmCut, itmCopy, itmPaste, itmFontColor, itmFind,
+            itmReplace,itmFontFormat;
     JCheckBoxMenuItem wordWrap;
     UndoAction undoAction;
     RedoAction redoAction;
@@ -24,7 +25,7 @@ public class NotPad extends JFrame {
     String fileName;
     String fileContent;
     JFileChooser fileChooser;
-   // public static NotPad notPad = new NotPad();
+    FontHelper fontHelper;
 
     public NotPad() {
         intFrame();
@@ -77,10 +78,24 @@ public class NotPad extends JFrame {
         itmReplace.addActionListener(e -> {
             new FindAndReplace(this,true);
         });
+        itmFontFormat.addActionListener(e -> {
+            fontHelper.setVisible(true);
+
+        });
+       fontHelper.getOk().addActionListener(e -> {
+           textArea.setFont(fontHelper.font());
+           fontHelper.setVisible(false);
+
+        });
+        fontHelper.getCancle().addActionListener(e -> {
+            fontHelper.setVisible(false);
+
+        });
 
     }
 
     private void intFrame() {
+        fontHelper = new FontHelper();
         undoManager = new UndoManager();
         undoAction = new UndoAction();
         redoAction = new RedoAction();
@@ -110,6 +125,7 @@ public class NotPad extends JFrame {
         itmFontColor = new JMenuItem("Font Color");
         itmFind = new JMenuItem("Find");
         itmReplace = new JMenuItem("Replace");
+        itmFontFormat = new JMenuItem("Font Format");
         //adding shortcut
         itmNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
         itmOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
@@ -138,6 +154,7 @@ public class NotPad extends JFrame {
         //add menu item to format
         mnuFormat.add(wordWrap);
         mnuFormat.add(itmFontColor);
+        mnuFormat.add(itmFontFormat);
         //add menu item to menu bar
         menuBar.add(mnuFile);
         menuBar.add(mnuEdit);
