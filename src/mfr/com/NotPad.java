@@ -1,6 +1,7 @@
 package mfr.com;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
@@ -99,7 +100,13 @@ public class NotPad extends JFrame {
         undoManager = new UndoManager();
         undoAction = new UndoAction();
         redoAction = new RedoAction();
-        fileChooser = new JFileChooser(".");
+        fileChooser = new JFileChooser();
+
+        FileNameExtensionFilter filter;
+        filter = new FileNameExtensionFilter(
+                "*.txt", new String[]{"txt"});
+        fileChooser.addChoosableFileFilter(filter);
+
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setTitle("untitled-Notepad");
         this.setSize(600, 700);
@@ -211,16 +218,36 @@ public class NotPad extends JFrame {
         try {
             chooserOption = fileChooser.showSaveDialog(this);
             if (chooserOption == JFileChooser.APPROVE_OPTION) {
-                printWriter = new PrintWriter(new FileWriter(fileChooser.getSelectedFile()));
-                StringTokenizer stringTokenizer = new StringTokenizer(textArea.getText(),
-                        System.getProperty("line.separator"));
-                while (stringTokenizer.hasMoreElements()) {
-                    printWriter.println(stringTokenizer.nextToken());
+                if(fileChooser.getSelectedFile().exists()){
+                    int option = JOptionPane.showConfirmDialog(this,"Do you want to replace this file?",
+                            "Confirmation",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE);
+                    if(option == 0){
+                        printWriter = new PrintWriter(new FileWriter(fileChooser.getSelectedFile()));
+                        StringTokenizer stringTokenizer = new StringTokenizer(textArea.getText(),
+                                System.getProperty("line.separator"));
+                        while (stringTokenizer.hasMoreElements()) {
+                            printWriter.println(stringTokenizer.nextToken());
+                        }
+                        fileName = String.valueOf(fileChooser.getSelectedFile());
+                        this.setTitle(fileChooser.getSelectedFile().getName());
+                        fileContent = textArea.getText();
+                        JOptionPane.showMessageDialog(this, "File Saved by replace");
+                    }else {
+                        saveAs();
+                    }
+                }else{
+                    printWriter = new PrintWriter(new FileWriter(fileChooser.getSelectedFile()));
+                    StringTokenizer stringTokenizer = new StringTokenizer(textArea.getText(),
+                            System.getProperty("line.separator"));
+                    while (stringTokenizer.hasMoreElements()) {
+                        printWriter.println(stringTokenizer.nextToken());
+                    }
+                    fileName = String.valueOf(fileChooser.getSelectedFile());
+                    this.setTitle(fileChooser.getSelectedFile().getName());
+                    fileContent = textArea.getText();
+                    JOptionPane.showMessageDialog(this, "File Saved");
                 }
-                fileName = String.valueOf(fileChooser.getSelectedFile());
-                this.setTitle(fileChooser.getSelectedFile().getName());
-                fileContent = textArea.getText();
-                JOptionPane.showMessageDialog(this, "File Saved");
+
             }
 
         } catch (IOException ioException) {
